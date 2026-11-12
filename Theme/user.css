@@ -1,0 +1,441 @@
+/* ==========================================================================
+   LIQUIDIFY — Apple Liquid Glass theme for Spicetify
+   Sections: 1 tokens · 2 wallpaper layer · 3 transparent shell · 4 glass panels
+             5 nav/topbar/search · 6 content · 7 playback bar · 8 menus · 9 motion
+             10 Wallpaper Studio
+   NOTE: Spotify class names are minified-stable but not guaranteed. If a surface
+   looks wrong after a Spotify update, see README → Troubleshooting.
+   ========================================================================== */
+
+/* ---- 1. TOKENS ---------------------------------------------------------- */
+/* Registered properties => the dynamic accent animates with a plain CSS transition. */
+@property --liquid-accent           { syntax: '<color>'; inherits: true; initial-value: #8b7cf6; }
+@property --liquid-accent-secondary { syntax: '<color>'; inherits: true; initial-value: #b49cff; }
+@property --liquid-glow             { syntax: '<color>'; inherits: true; initial-value: rgba(139,124,246,.25); }
+@property --liquid-glass            { syntax: '<color>'; inherits: true; initial-value: rgba(255,255,255,.08); }
+
+:root {
+  /* written at runtime by liquidify-colors.js */
+  --liquid-accent: #8b7cf6;
+  --liquid-accent-secondary: #b49cff;
+  --liquid-accent-rgb: 139, 124, 246;
+  --liquid-glow: rgba(139, 124, 246, .25);
+  --liquid-glass: rgba(255, 255, 255, .08);
+  --liquid-on-accent: #0b0b10;
+
+  /* written by Wallpaper Studio / theme.js */
+  --lq-blur: 24px;
+  --lq-tint: .07;
+
+  --lq-radius: 18px;
+  --lq-radius-sm: 12px;
+  --lq-fill: rgba(18, 18, 24, .42);                 /* dark base keeps text readable on bright wallpapers */
+  --lq-fill-strong: rgba(22, 22, 28, .62);
+  --lq-border: rgba(255, 255, 255, .14);
+  --lq-border-soft: rgba(255, 255, 255, .08);
+  --lq-shadow: 0 12px 32px rgba(0, 0, 0, .30), 0 2px 8px rgba(0, 0, 0, .18);
+  --lq-hilite: inset 0 1px 0 rgba(255, 255, 255, .18), inset 0 0 0 1px rgba(255, 255, 255, .03);
+  --lq-glass-bg: linear-gradient(150deg, rgba(255,255,255,var(--lq-tint)), rgba(255,255,255,.015) 60%), linear-gradient(var(--liquid-glass), var(--liquid-glass)), var(--lq-fill);
+  --lq-filter: blur(var(--lq-blur)) saturate(165%);
+  --lq-ease: cubic-bezier(.2, .8, .2, 1);
+
+  --lq-font: "SF Pro Display", "SF Pro Text", "Segoe UI Variable Display", "Segoe UI Variable Text", "Segoe UI", -apple-system, system-ui, sans-serif;
+  --font-family: var(--lq-font);
+  --encore-body-font-stack: var(--lq-font);
+  --encore-title-font-stack: var(--lq-font);
+
+  transition: --liquid-accent .9s ease, --liquid-accent-secondary .9s ease, --liquid-glow .9s ease, --liquid-glass .9s ease;
+}
+
+/* Performance mode: no backdrop-filter anywhere, more opaque panels */
+:root.liquidify-lite { --lq-fill: rgba(18, 18, 24, .80); --lq-fill-strong: rgba(22, 22, 28, .90); --lq-filter: none; }
+:root.liquidify-lite * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
+/* Route Spotify's own accent variables through the dynamic accent */
+:root:root {
+  --spice-button: var(--liquid-accent);
+  --spice-button-active: var(--liquid-accent-secondary);
+  --spice-equalizer: var(--liquid-accent-secondary);
+  --spice-rgb-button: var(--liquid-accent-rgb);
+  --essential-bright-accent: var(--liquid-accent);
+  --text-bright-accent: var(--liquid-accent);
+}
+
+body, .encore-text { font-family: var(--lq-font); -webkit-font-smoothing: antialiased; }
+
+/* ---- 2. WALLPAPER LAYER (content is NEVER allowed to size this) ---------- */
+.lq-wp { position: absolute; overflow: hidden; background: #08080c; }
+#liquidify-wallpaper.lq-wp { position: fixed; inset: 0; z-index: -1; pointer-events: none; contain: strict; }
+.lq-wp-base {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(60% 50% at 12% 8%, var(--liquid-glow), transparent 70%),
+    radial-gradient(55% 50% at 92% 96%, var(--liquid-glow), transparent 70%);
+}
+.lq-wp-img { position: absolute; left: 0; top: 0; max-width: none; max-height: none; transform-origin: 0 0; user-select: none; display: none; }
+.lq-wp-overlay { position: absolute; inset: 0; }
+
+/* ---- 3. TRANSPARENT SHELL ---------------------------------------------- */
+html, body, #main, .Root, .Root__top-container, .Root__globalNav, .Root__top-bar,
+.Root__nav-bar, .Root__main-view, .Root__right-sidebar, .Root__now-playing-bar {
+  background: transparent !important;
+}
+.Root__top-container { --left-sidebar-width: 280px; }
+
+/* ---- 4. GLASS PANELS ---------------------------------------------------- */
+.main-yourLibraryX-libraryContainer,
+.main-navBar-navBar, .main-yourLibraryX-navItems,
+.main-view-container,
+.Root__right-sidebar section, .Root__right-sidebar aside,
+.main-nowPlayingBar-nowPlayingBar {
+  background: var(--lq-glass-bg) !important;
+  -webkit-backdrop-filter: var(--lq-filter); backdrop-filter: var(--lq-filter);
+  border: 1px solid var(--lq-border-soft);
+  border-radius: var(--lq-radius) !important;
+  box-shadow: var(--lq-shadow), var(--lq-hilite);
+}
+.main-view-container__scroll-node-child, .main-view-container__scroll-node,
+.main-home-content, .main-yourLibraryX-library, .main-yourLibraryX-libraryItemContainer {
+  background: transparent !important;
+}
+/* Sticky bars inside scrolling lists need their own tint so rows don't show through */
+.main-actionBar-ActionBarRow, .main-trackList-trackListHeaderRow, .main-topBar-container, .main-topBar-background {
+  background: var(--lq-fill-strong) !important;
+  -webkit-backdrop-filter: var(--lq-filter); backdrop-filter: var(--lq-filter);
+}
+/* Artist/playlist hero gradients fight the wallpaper: soften them */
+.main-entityHeader-background, .main-entityHeader-overlay, .main-entityHeader-backgroundColor { opacity: .25 !important; }
+
+/* ---- 5. NAV / TOPBAR / SEARCH ------------------------------------------ */
+.main-yourLibraryX-navLink, .main-yourLibraryX-listItem, .main-navBar-navBarLink {
+  border-radius: var(--lq-radius-sm) !important;
+  transition: background .25s var(--lq-ease), transform .25s var(--lq-ease), color .25s var(--lq-ease);
+}
+.main-yourLibraryX-navLink:hover, .main-navBar-navBarLink:hover, .main-yourLibraryX-listItem:hover {
+  background: rgba(255, 255, 255, .09) !important;
+}
+.main-yourLibraryX-navLinkActive, .main-navBar-navBarLinkActive { background: rgba(var(--liquid-accent-rgb), .18) !important; color: #fff !important; }
+
+.main-topBar-container { border-radius: var(--lq-radius) var(--lq-radius) 0 0; border-bottom: 1px solid var(--lq-border-soft); }
+.main-topBar-historyButtons button, .main-globalNav-historyButtonsContainer button,
+.main-topBar-button, .main-userWidget-box {
+  background: rgba(255, 255, 255, .08) !important; border: 1px solid var(--lq-border-soft);
+  transition: background .25s var(--lq-ease), transform .2s var(--lq-ease);
+}
+.main-topBar-historyButtons button:hover, .main-globalNav-historyButtonsContainer button:hover,
+.main-topBar-button:hover, .main-userWidget-box:hover { background: rgba(255, 255, 255, .16) !important; }
+.main-topBar-historyButtons button:active, .main-topBar-button:active { transform: scale(.94); }
+
+/* Search: pill-shaped frosted field */
+[data-testid="search-input"], .x-searchInput-searchInputInput, .main-globalNav-searchContainer input, .main-globalNav-searchInputContainer {
+  background: rgba(255, 255, 255, .09) !important;
+  border: 1px solid var(--lq-border-soft) !important;
+  border-radius: 999px !important;
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  transition: background .25s var(--lq-ease), box-shadow .25s var(--lq-ease);
+}
+[data-testid="search-input"]:focus, .x-searchInput-searchInputInput:focus {
+  background: rgba(255, 255, 255, .14) !important;
+  box-shadow: 0 0 0 2px rgba(var(--liquid-accent-rgb), .55) !important;
+}
+
+/* ---- 6. CONTENT --------------------------------------------------------- */
+.main-card-card {
+  background: rgba(255, 255, 255, .05) !important;
+  border: 1px solid var(--lq-border-soft); border-radius: var(--lq-radius) !important;
+  box-shadow: var(--lq-hilite);
+  transition: transform .35s var(--lq-ease), background .25s var(--lq-ease), box-shadow .35s var(--lq-ease);
+}
+.main-card-card:hover {
+  background: rgba(255, 255, 255, .11) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, .35), 0 0 0 1px rgba(255, 255, 255, .12), 0 8px 40px -12px var(--liquid-glow);
+}
+.main-cardImage-imageWrapper, .main-image-imageContainer, .main-entityHeader-image {
+  border-radius: 14px !important; overflow: hidden;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .35);
+}
+.main-cardImage-imageWrapper img, .main-image-image { object-fit: cover; transition: transform .5s var(--lq-ease); }
+.main-card-card:hover .main-cardImage-imageWrapper img { transform: scale(1.03); }  /* zoom inside a clipped box: no distortion */
+
+.main-trackList-trackListRow { border-radius: 10px !important; transition: background .2s var(--lq-ease); }
+.main-trackList-trackListRow:hover { background: rgba(255, 255, 255, .08) !important; }
+.main-trackList-selected, .main-trackList-trackListRow[aria-selected="true"] { background: rgba(var(--liquid-accent-rgb), .18) !important; }
+
+
+
+*::-webkit-scrollbar { width: 12px; height: 12px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .18); border-radius: 10px; border: 3px solid transparent; background-clip: padding-box; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .32); background-clip: padding-box; border: 3px solid transparent; }
+
+/* ---- 7. PLAYBACK BAR (floating glass) ----------------------------------- */
+.Root__now-playing-bar { padding: 0 8px 8px !important; }
+.main-nowPlayingBar-container { background: transparent !important; border: 0 !important; }
+.main-nowPlayingBar-nowPlayingBar { border-radius: 22px !important; box-shadow: var(--lq-shadow), var(--lq-hilite), 0 0 40px -18px var(--liquid-glow); }
+.main-nowPlayingWidget-coverArt img, .cover-art, .main-coverSlotCollapsed-container img { border-radius: 10px !important; box-shadow: 0 4px 14px rgba(0, 0, 0, .4); }
+
+.progress-bar, .playback-progressbar, .volume-bar {
+  --fg-color: var(--liquid-accent) !important;
+  --hover-fg-color: var(--liquid-accent-secondary) !important;
+  --bg-color: rgba(255, 255, 255, .18) !important;
+  --progress-bar-height: 4px;
+}
+[data-testid="control-button-playpause"] {
+  background: var(--liquid-accent) !important; color: var(--liquid-on-accent) !important;
+  transition: transform .2s var(--lq-ease), background .3s ease;
+}
+[data-testid="control-button-playpause"]:hover { transform: scale(1.07); }
+[data-testid="control-button-playpause"]:active { transform: scale(.95); }
+.main-nowPlayingBar-nowPlayingBar button:not([data-testid="control-button-playpause"]) { transition: color .2s ease, transform .2s var(--lq-ease); }
+.main-nowPlayingBar-nowPlayingBar button:active { transform: scale(.92); }
+
+/* ---- 8. CONTEXT MENUS & POPUPS ------------------------------------------ */
+.main-contextMenu-menu, #context-menu .main-contextMenu-menu, .main-userWidget-dropDown, .tippy-box {
+  background: rgba(28, 28, 34, .62) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(170%); backdrop-filter: blur(30px) saturate(170%);
+  border: 1px solid var(--lq-border) !important; border-radius: 14px !important;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .45), var(--lq-hilite) !important;
+  padding: 6px !important;
+}
+.main-contextMenu-menuItemButton { border-radius: 8px !important; transition: background .15s ease; }
+.main-contextMenu-menuItemButton:hover, .main-contextMenu-menuItemButton:focus-visible { background: rgba(255, 255, 255, .12) !important; }
+.GenericModal > div, .main-embedWidgetGenerator-container { background: rgba(28, 28, 34, .72) !important; -webkit-backdrop-filter: blur(30px); backdrop-filter: blur(30px); border: 1px solid var(--lq-border); border-radius: 18px; }
+
+/* ---- 9. MOTION ---------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+  .main-card-card:hover { transform: none; }
+}
+
+/* ---- 10. WALLPAPER STUDIO ----------------------------------------------- */
+#lq-studio {
+  position: fixed; inset: 0; z-index: 99999; display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, .38); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  opacity: 0; visibility: hidden; transition: opacity .28s var(--lq-ease), visibility 0s linear .28s;
+  font-family: var(--lq-font); color: #f5f5f7;
+}
+#lq-studio.open { opacity: 1; visibility: visible; transition: opacity .28s var(--lq-ease); }
+#lq-studio .lq-panel {
+  width: min(1040px, 94vw); max-height: 92vh; display: grid; grid-template-columns: 1.2fr 1fr; grid-template-rows: auto minmax(0, 1fr) auto;
+  background: linear-gradient(150deg, rgba(255,255,255,.10), rgba(255,255,255,.03) 60%), rgba(24, 24, 30, .72);
+  -webkit-backdrop-filter: blur(36px) saturate(170%); backdrop-filter: blur(36px) saturate(170%);
+  border: 1px solid var(--lq-border); border-radius: 26px; overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .55), var(--lq-hilite);
+  transform: translateY(12px) scale(.985); transition: transform .35s var(--lq-ease);
+}
+#lq-studio.open .lq-panel { transform: none; }
+#lq-studio .lq-head { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: flex-start; padding: 22px 26px 12px; }
+#lq-studio h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -.02em; }
+#lq-studio .lq-head p { margin: 4px 0 0; font-size: 12.5px; color: #a1a1a6; }
+#lq-studio .lq-x { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--lq-border-soft); background: rgba(255,255,255,.10); color: #fff; font-size: 18px; line-height: 1; cursor: pointer; transition: background .2s; }
+#lq-studio .lq-x:hover { background: rgba(255,255,255,.2); }
+#lq-studio .lq-left { padding: 8px 14px 14px 26px; min-width: 0; }
+#lq-studio .lq-pvwrap { width: 100%; display: flex; justify-content: center; }
+#lq-studio .lq-pv { position: relative; overflow: hidden; border-radius: 14px; border: 1px solid var(--lq-border); background: #08080c; cursor: grab; touch-action: none; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+#lq-studio .lq-pv.drag { cursor: grabbing; }
+#lq-studio .lq-pv-stage { left: 0; top: 0; transform-origin: 0 0; }
+#lq-studio .lq-pv-ui { position: absolute; inset: 0; pointer-events: none; }
+#lq-studio .lq-pv-g { position: absolute; border-radius: 18px; background: var(--lq-glass-bg); border: 1px solid var(--lq-border-soft); -webkit-backdrop-filter: var(--lq-filter); backdrop-filter: var(--lq-filter); }
+#lq-studio .lq-pv-side { left: 8px; top: 8px; bottom: 100px; width: 270px; }
+#lq-studio .lq-pv-main { left: 286px; right: 8px; top: 8px; bottom: 100px; }
+#lq-studio .lq-pv-bar { left: 8px; right: 8px; bottom: 8px; height: 82px; border-radius: 22px; }
+#lq-studio .lq-pv-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #a1a1a6; font-size: 13px; pointer-events: none; }
+#lq-studio .lq-hint { margin: 10px 0 0; font-size: 11.5px; color: #8e8e93; text-align: center; }
+#lq-studio .lq-right { padding: 4px 26px 14px 14px; overflow-y: auto; min-height: 0; }
+#lq-studio .lq-sec { padding: 12px 0; border-top: 1px solid var(--lq-border-soft); }
+#lq-studio .lq-sec:first-child { border-top: 0; }
+#lq-studio h3 { margin: 0 0 10px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #a1a1a6; }
+#lq-studio h3 small { text-transform: none; letter-spacing: 0; font-weight: 400; margin-left: 6px; color: #7d7d83; }
+#lq-studio .lq-row { display: grid; grid-template-columns: 92px 1fr 64px; align-items: center; gap: 10px; margin: 8px 0; font-size: 13px; }
+#lq-studio .lq-row > span { color: #d1d1d6; }
+#lq-studio .lq-row output { text-align: right; font-variant-numeric: tabular-nums; color: #a1a1a6; font-size: 12px; }
+#lq-studio .lq-row select { grid-column: 2 / -1; }
+#lq-studio .lq-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 6px; }
+#lq-studio .lq-name { font-size: 12px; color: #a1a1a6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
+#lq-studio .lq-check { display: flex; align-items: flex-start; gap: 9px; margin: 8px 0; font-size: 13px; color: #d1d1d6; cursor: pointer; }
+#lq-studio .lq-check em { font-style: normal; color: #8e8e93; font-size: 12px; }
+#lq-studio input[type="checkbox"] { accent-color: var(--liquid-accent); margin-top: 2px; }
+#lq-studio input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; border-radius: 4px; background: rgba(255,255,255,.2); outline: none; }
+#lq-studio input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.4), 0 0 0 4px rgba(var(--liquid-accent-rgb), .25); cursor: pointer; transition: box-shadow .2s; }
+#lq-studio input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 2px 8px rgba(0,0,0,.4), 0 0 0 6px rgba(var(--liquid-accent-rgb), .35); }
+#lq-studio select, #lq-studio .lq-num { background: rgba(255,255,255,.10); color: #f5f5f7; border: 1px solid var(--lq-border-soft); border-radius: 9px; padding: 6px 8px; font: inherit; font-size: 12.5px; outline: none; }
+#lq-studio .lq-num { width: 64px; }
+#lq-studio select option { background: #1c1c22; }
+#lq-studio .lq-align { display: grid; grid-template-columns: repeat(3, 22px); gap: 4px; margin-bottom: 6px; }
+#lq-studio .lq-align button { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--lq-border-soft); background: rgba(255,255,255,.10); cursor: pointer; transition: background .2s, transform .15s; }
+#lq-studio .lq-align button:hover { background: rgba(var(--liquid-accent-rgb), .55); transform: scale(1.08); }
+#lq-studio .lq-btn { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--lq-border-soft); background: rgba(255,255,255,.10); color: #f5f5f7; font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; transition: background .2s, transform .15s; }
+#lq-studio .lq-btn:hover { background: rgba(255,255,255,.18); }
+#lq-studio .lq-btn:active { transform: scale(.96); }
+#lq-studio .lq-btn.pri { background: var(--liquid-accent); color: var(--liquid-on-accent); border-color: transparent; font-weight: 600; }
+#lq-studio .lq-btn.pri:hover { background: var(--liquid-accent-secondary); }
+#lq-studio .lq-btn.danger:hover { background: rgba(255, 95, 87, .35); }
+#lq-studio .lq-foot { grid-column: 1 / -1; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 14px 26px 20px; border-top: 1px solid var(--lq-border-soft); }
+#lq-studio .lq-foot > div { display: flex; gap: 8px; flex-wrap: wrap; }
+@media (max-width: 820px) { #lq-studio .lq-panel { grid-template-columns: 1fr; overflow-y: auto; } #lq-studio .lq-left { padding: 8px 26px; } #lq-studio .lq-right { padding: 4px 26px; overflow: visible; } }
+/* ===== Marketplace: filter/search bar ===== */
+.marketplace-header,
+.marketplace-header-container,
+.marketplace-header__left,
+.marketplace-header__right,
+.marketplace-header__container,
+.marketplace-tabBar,
+.marketplace-tabBar-headerItem,
+.marketplace-content,
+.marketplace-grid,
+#marketplace-app, .marketplace-body {
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+/* The header strip itself: light frosted glass instead of a black block */
+.marketplace-header {
+  background: rgba(255, 255, 255, .06) !important;
+  border: 1px solid var(--lq-border-soft) !important;
+  border-radius: 14px !important;
+  padding: 8px 14px !important;
+  margin: 8px 0 !important;
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+}
+
+/* "Sort by:" label: normal size, matches the other text */
+.marketplace-header__label,
+.marketplace-header__left > label,
+.marketplace-header__left > span {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #f5f5f7 !important;
+}
+
+/* Sort dropdown + search box: same pill style as the top bar */
+.marketplace-header select,
+.marketplace-header .marketplace-sortbox,
+.marketplace-searchbar,
+.marketplace-header input[type="text"],
+.marketplace-header input[type="search"] {
+  background: rgba(255, 255, 255, .09) !important;
+  border: 1px solid var(--lq-border-soft) !important;
+  border-radius: 999px !important;
+  color: #f5f5f7 !important;
+  box-shadow: none !important;
+  padding: 6px 14px !important;
+}
+.marketplace-header input:focus {
+  box-shadow: 0 0 0 2px rgba(var(--liquid-accent-rgb), .55) !important;
+}
+
+/* Tab row: remove the dark fill and the red glow line under it */
+.marketplace-tabBar,
+.marketplace-tabBar-header,
+.marketplace-tabBar-headerItem {
+  background: transparent !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+.marketplace-tabBar-headerItem--selected,
+.marketplace-tabBar-headerItem[aria-selected="true"] {
+  background: rgba(255, 255, 255, .12) !important;
+  border-radius: 10px !important;
+}/* ===== Marketplace: tab row + remaining black boxes ===== */
+
+/* Tab row: undo the dark top-bar fill, but only on pages that contain Marketplace tabs */
+.main-topBar-container:has(.marketplace-tabBar),
+.main-topBar-background:has(.marketplace-tabBar),
+.main-topBar-topbarContentWrapper:has(.marketplace-tabBar),
+.main-topBar-container:has([class*="marketplace"]),
+.marketplace-tabBar-header,
+.marketplace-tabBar-headerItem {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Selected tab = soft glass pill, unselected = plain text */
+.marketplace-tabBar-headerItem { border-radius: 10px !important; transition: background .2s var(--lq-ease); }
+.marketplace-tabBar-headerItem:hover { background: rgba(255, 255, 255, .08) !important; }
+.marketplace-tabBar-headerItem--selected,
+.marketplace-tabBar-headerItem[aria-selected="true"] { background: rgba(255, 255, 255, .14) !important; }
+
+/* Sort dropdown + settings gear: replace black fill with the same glass as the search box */
+.marketplace-header button,
+.marketplace-header [role="button"],
+.marketplace-header .x-sortBox-sortDropdown,
+.marketplace-header [class*="sortBox"],
+.marketplace-header [class*="settings"],
+.marketplace-header__right > button,
+.marketplace-header__left > button,
+.marketplace-header select {
+  background: rgba(255, 255, 255, .09) !important;
+  background-image: none !important;
+  border: 1px solid var(--lq-border-soft) !important;
+  border-radius: 999px !important;
+  color: #f5f5f7 !important;
+  box-shadow: none !important;
+  transition: background .2s var(--lq-ease) !important;
+}
+.marketplace-header button:hover,
+.marketplace-header [role="button"]:hover,
+.marketplace-header select:hover { background: rgba(255, 255, 255, .17) !important; }
+
+/* Gear: make it a clean circle */
+.marketplace-header__right > button:last-child,
+.marketplace-header [class*="settings"] {
+  width: 38px !important; height: 38px !important; padding: 0 !important;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50% !important;
+}
+
+/* Search placeholder was too faint */
+.marketplace-header input::placeholder { color: rgba(245, 245, 247, .55) !important; }
+/* ===== Homepage: remove the dark top gradient band ===== */
+.main-home-homeHeader,
+.main-home-gradient,
+.under-main-view,
+.main-home-content,
+.main-home-content > div,
+.main-home-content > section,
+.main-home-content [class*="gradient" i],
+.main-home-content [class*="Gradient"],
+.main-view-container__scroll-node-child > div,
+.main-view-container__scroll-node-child > section,
+[data-testid="home-page"],
+[data-testid="home-page"] > div {
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+.main-home-homeHeader::before, .main-home-homeHeader::after,
+.main-home-content::before, .main-home-content::after,
+.under-main-view::before, .under-main-view::after,
+.main-home-content > *::before, .main-home-content > *::after {
+  background: none !important;
+  background-image: none !important;
+}
+
+/* Shortcut chips (On Repeat, daylist...) as glass instead of dark blocks */
+.main-home-content [data-testid="shortcut"],
+.main-home-content [data-encore-id="shortcut"],
+.main-shortcuts-shortcut {
+  background: rgba(255, 255, 255, .08) !important;
+  border: 1px solid var(--lq-border-soft) !important;
+  border-radius: 12px !important;
+}
+.main-home-content [data-testid="shortcut"]:hover,
+.main-shortcuts-shortcut:hover { background: rgba(255, 255, 255, .15) !important; }
+
+/* Green squares on the chips: round + hidden until hover */
+.main-shortcuts-shortcut [data-testid="play-button"],
+.main-shortcuts-shortcut .main-playButton-PlayButton,
+.main-home-content [data-testid="shortcut"] [data-testid="play-button"] {
+  border-radius: 50% !important;
+  opacity: 0 !important;
+}
+.main-shortcuts-shortcut:hover [data-testid="play-button"],
+.main-shortcuts-shortcut:hover .main-playButton-PlayButton,
+.main-home-content [data-testid="shortcut"]:hover [data-testid="play-button"] { opacity: 1 !important; }
