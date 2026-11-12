@@ -20,12 +20,11 @@ Liquidify is designed to bring seamless, liquid-like transitions and dynamic lay
 Here is a look at the Liquidify theme in action, showcasing its sleek dark mode, rounded elements, and clean interface:
 
 *   **Homepage View:**
-    ![Homepage View](Screenshot 2026-11-12 152457.jpg)
+    ![Homepage View](assets/Screenshot%202026-11-12%20152457.jpg)
 *   **Snippets View:**
-    ![Snippets View](Screenshot 2026-11-12 152508.jpg)
+    ![Snippets View](assets/Screenshot%202026-11-12%20152508.jpg)
 *   **Active Player View:**
-    ![Active Player View](Screenshot 2026-11-12 152524.jpg)
-
+    ![Active Player View](assets/Screenshot%202026-11-12%20152524.jpg)
 ## 🚀 Installation
 
 Clone the repository to get started:
